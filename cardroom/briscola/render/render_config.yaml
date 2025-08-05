@@ -1,0 +1,32 @@
+pygame:
+  display:
+    caption: "Cardroom - Briscola"
+    width: 800
+    height: 600
+    fps: 30
+  colors:
+    green: [53, 101, 77]
+  cards:
+    height: 110
+    width: 65
+    style: "bergamasche"
+    hand_spacing: 20 # spacing between cards in hand
+    side_margin: 10 # margin from the side of the screen
+    table_margin: 10 # margin from center of the table for played cards
+    name_margin: 20 # margin of player name above cards
+    deck_offset: 0.5 # offset of each card when rendering deck
+    pointer_margin: 10 # margin of turn pointer from name
+    pointer_radius: 6 # radius of pointer circle
+  game:
+    delay: 2 # delay in seconds before rendering of new state.
+    show_hole_cards: false
+    players: ["human", "random"]
+  settings_options:
+    card_styles: ["bergamasche", "napoletane", "french"]
+    player_mode: ["human", "random"]
+    show_hole_cards: ["No", "Yes"]
+    # default mode are index of default value in above lists
+    # apart from card style which is always bergamasche, defined above in cards settings
+    default_p1_mode: 0
+    default_p2_mode: 1
+    default_show: 0
