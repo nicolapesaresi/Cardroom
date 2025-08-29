@@ -1,5 +1,6 @@
 import pygame
 
+from copy import deepcopy
 from cardroom.briscola.game.dealer import BriscolaDealer
 from cardroom.briscola.game.player import BriscolaPlayer
 from cardroom.briscola.agents.random import RandomAgent
@@ -10,36 +11,31 @@ RENDER_MODES = [None, "text", "pygame"]
 
 class BriscolaEnv:
     """Environment for a game of Briscola."""
-    def __init__(self, players: list[BriscolaPlayer,BriscolaPlayer]|None = None, render_mode: str = "text"):
+    def __init__(self, names: list[str,str]|None, render_mode: str = "text"):
         """Instantiates the environment.
         Args:
-            players: list of players who are going to play the game.
+            names: names of players who are going to play the game.
             render_mode: render mode for the game.
         """
         self.n_players = 2
         if render_mode not in RENDER_MODES:
             raise NotImplementedError(f"Render mode {render_mode} not implented.")
         self.render_mode = render_mode
-        self.instantiate_players(players)
+        self.instantiate_players(names)
         self.reset()
         self.render()
 
-    def instantiate_players(self, players: list[BriscolaPlayer, BriscolaPlayer] | None = None):
+    def instantiate_players(self, names: list[str, str] | None = None):
         """Instantiates the players for the game.
         Args:
             players: list of players who are going to play the game.
         """
-        # if players has not been provided, instantiate two random agents
-        if players is None:
-            self.players = [BriscolaPlayer(agent=RandomAgent(name=f"RandomP{i}")) for i in range(self.n_players)]
-        # if players has been provided, check that it is a valid format
+        if names is None:
+            self.players = [BriscolaPlayer(f"P{i}") for i in range(self.n_players)]
         else:
-            if len(players) != self.n_players:
-                raise ValueError(f"Expected {self.n_players} players, got {len(players)}")
-            for player in players:
-                if not isinstance(player, BriscolaPlayer):
-                    raise TypeError(f"Expected BriscolaPlayer, got {type(player)}")
-            self.players = players
+            if len(names) != self.n_players:
+                raise ValueError(f"Expected {self.n_players} players, got {len(names)}")
+            self.players = [BriscolaPlayer(name) for name in names]
 
     def set_turn_order(self, first_id: int):
         """Sets the turn order for the players given who has to start.
@@ -246,12 +242,16 @@ class BriscolaEnv:
         Args:
             state: current state of the game.
         """
+        # also render text for logging
+        self.text_render(state)
+        
         # init pygame
         if not pygame.get_init():
             self.pygame = BriscolaPygame()
-            for player in self.players:
-                if isinstance(player.agent, HumanAgent) and player.agent.input_mode ==  "pygame":
-                    player.agent.set_pygame_action_retriever(self.pygame)
+            # for player in self.players:
+            #     #if isinstance(player.agent, HumanAgent) and player.agent.input_mode ==  "pygame":
+            #     # TODO: at the moment only humans players are handled
+            #     player.agent.set_pygame_action_retriever(self.pygame)
 
         if self.pygame.running:
             # self.pygame.handle_events() is called by human agent select_action
@@ -259,5 +259,81 @@ class BriscolaEnv:
         else:
             self.pygame.close()
 
-        # also render text for logging
-        self.text_render(state)
+
+    def clone(self):
+        """Creates a new instance of the enviroment, which is a copy of the current state.
+        Returns:
+            clone: clone of the current environment.
+        """
+        # make a fresh env with the same players and no render
+        clone = BriscolaEnv([p.name for p in self.players], render_mode=None)
+
+        clone.n_players = self.n_players
+        clone.done = self.done
+        for i in range(len(clone.players)):
+            real_player = self.players[i]
+            clone.players[i].hand = [card for card in real_player.hand]
+            for card in clone.players[i].hand:
+                if hasattr(card, "image"):
+                    del card.image
+        clone.played_cards_history = list(self.played_cards_history)
+        for card in clone.played_cards_history:
+            if hasattr(card, "image"):
+                del card.image
+        clone.turn_history = list(self.turn_history)
+        clone.current_player_id = self.current_player_id
+        clone.turn_order = list(self.turn_order)
+        clone.turn_counter = self.turn_counter
+        clone.cards_on_table = list(self.cards_on_table)
+        for card in clone.cards_on_table:
+            if hasattr(card, "image"):
+                del card.image
+
+        # clone dealer
+        clone.dealer = self.dealer.clone()
+
+        # clone players (but not their agents/rendering)
+        clone.players = []
+        for orig in self.players:
+            new_p = BriscolaPlayer(orig.name)
+            new_p.hand = list(orig.hand)
+            new_p.points = orig.points
+            new_p.taken_cards = list(orig.taken_cards)
+            clone.players.append(new_p)
+
+        # briscola info
+        clone.briscola_spy = self.briscola_spy
+        clone.briscola_suit_id = self.briscola_suit_id
+
+        return clone
+
+    
+    def clone_from_observation(self):
+        """Creates a copy of the environment from the side of one player, so randomly shuffling remaining unknown cards.
+        Returns:
+            obs_clone: random clone of the environment from point of view of one player.
+        """
+        obs = self.get_observation()
+        clone = self.clone()
+
+        # mix deck and other player hand
+        if self.dealer.cards_left > 0: # if deck is empty, don't shuffle because other player hand is known
+            hand_sizes = []
+            briscola_spy = clone.dealer.deck.pop(0)
+            for player_id in range(len(clone.players)):
+                hand_sizes.append(len(clone.players[player_id].hand))
+                if player_id == clone.current_player_id:
+                    continue
+                for _ in range(len(clone.players[player_id].hand)):
+                    card = clone.players[player_id].hand.pop()
+                    clone.dealer.deck.append(card)
+            clone.dealer.shuffle()
+            clone.dealer.deck.insert(0, briscola_spy)
+            for player_id in range(len(clone.players)):
+                if player_id == clone.current_player_id:
+                    continue
+                for _ in range(hand_sizes[player_id]):
+                    clone.players[player_id].hand.append(clone.dealer.deal())
+            
+        clone.render_mode = None
+        return clone

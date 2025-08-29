@@ -4,25 +4,38 @@ from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.game.player import BriscolaPlayer
 from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
+from cardroom.briscola.agents.donatello import DonatelloAgent
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("n_games", help="number of games to play")
+    parser.add_argument("render_mode", help="text, pygame or None")
     args = parser.parse_args()
-    n = int(args.n_games)
+    n_games = int(args.n_games)
+    render_mode = args.render_mode
+    if render_mode == "None":
+        render_mode = None
     
-    human = BriscolaPlayer(HumanAgent(), name="Nicola")
-    random = BriscolaPlayer(RandomAgent(), name="Mike")
-    random2 = BriscolaPlayer(RandomAgent(), name="John")
-    #players = [human, random]
-    players = [random, random2]
-
+    #human = HumanAgent(input_mode=render_mode)
+    random = RandomAgent()
+    donatello = DonatelloAgent()
+    names = ["Donatello", "Random"]
     results = []
-    for i in range(n):
-        env = BriscolaEnv(players, "text")
+
+    for i in range(n_games):
+        env = BriscolaEnv(names, render_mode=render_mode)
+        if render_mode == "pygame":
+            human.set_pygame_action_retriever(env.pygame)
+        agents = [donatello, random]
+        
         while not env.done:
-            player = env.players[env.current_player_id]
-            action = player.get_action(env.get_observation())
+            player_id = env.current_player_id
+            player = env.players[player_id]
+            agent = agents[player_id]
+            if isinstance(agent, DonatelloAgent): # ugly. should be the same call for all agents
+                action = agent.select_action(env.get_observation(), env.clone_from_observation())
+            else:
+                action = agent.select_action(env.get_observation())
             env.step(action)
         
         result = env.result
@@ -30,6 +43,6 @@ if __name__ == "__main__":
     
     # summary
     print("Summary:")
-    print(f"{players[0].name} wins: {results.count(1)}")
-    print(f"{players[1].name} wins: {results.count(-1)}")
+    print(f"{names[0]} wins: {results.count(1)}")
+    print(f"{names[1]} wins: {results.count(-1)}")
     print(f"Draws: {results.count(0)}")

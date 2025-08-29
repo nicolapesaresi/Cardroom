@@ -2,18 +2,26 @@ from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.game.player import BriscolaPlayer
 from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
+from cardroom.briscola.agents.donatello import DonatelloAgent
+from cardroom.briscola.agents.bot import BotAgent
 
 if __name__ == "__main__":
-    human = BriscolaPlayer(HumanAgent(input_mode="pygame"), name="Nicola")
-    human2 = BriscolaPlayer(HumanAgent(input_mode="pygame"), name="EvilNick")
-    random = BriscolaPlayer(RandomAgent(), name="Mike")
-    random2 = BriscolaPlayer(RandomAgent(), name="John")
-    players = [human, human2]
-    #players = [random, random2]
+    human = HumanAgent(input_mode="pygame")
+    random = RandomAgent()
+    donatello = DonatelloAgent()
+    bot = BotAgent()
 
-    env = BriscolaEnv(players, "pygame")
+    names = ["Nick", "Donatello"]
+    agents = [human, bot]# donatello]
+    env = BriscolaEnv(names, "pygame")
+
+    human.set_pygame_action_retriever(env.pygame) #TODO: this should probably be handled by an orchestrator
 
     while not env.done:
-        player = env.players[env.current_player_id]
-        action = player.get_action(env.get_observation())
+        player_id = env.current_player_id
+        agent = agents[player_id]
+        if isinstance(agent, DonatelloAgent): # ugly. should be the same call for all agents
+            action = agent.select_action(env.get_observation(), env.clone_from_observation())
+        else:
+            action = agent.select_action(env.get_observation())
         env.step(action)

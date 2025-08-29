@@ -1,15 +1,16 @@
 from cardroom.briscola.cards.cards import Card
-from cardroom.briscola.agents.agent import Agent
+# from cardroom.briscola.agents.agent import Agent
 
 class BriscolaPlayer:
     """Class for Briscola Player."""
-    def __init__(self, agent: Agent, name: str = "Player"):
+    def __init__(self, name: str = "Player"):
+    # def __init__(self, agent: Agent, name: str = "Player"):
         """Instantiates briscola player.
         Args:
-            agent: agent that makes the decisions for the player.
+            # agent: agent that makes the decisions for the player.
             name: name of the player.
         """
-        self.agent = agent
+        # self.agent = agent
         self.name = name
         # uncomment if score tracking is implemented
         # self.games_played = 0
@@ -22,16 +23,16 @@ class BriscolaPlayer:
         self.hand = []
         self.taken_cards = []
 
-    def get_action(self, game_state: dict) -> int:
-        """Calls the agent to decide a move, then returns the selected action.
-        Args:
-            game_state: dictionary describing the state of the game.
-        Returns:
-            chosen action
-        """
-        if len(self.hand) == 0:
-            raise IndexError(f"{self.name}'s hand is empty when play_card is called.")
-        return self.agent.select_action(game_state)
+    # def get_action(self, game_state: dict) -> int:
+    #     """Calls the agent to decide a move, then returns the selected action.
+    #     Args:
+    #         game_state: dictionary describing the state of the game.
+    #     Returns:
+    #         chosen action
+    #     """
+    #     if len(self.hand) == 0:
+    #         raise IndexError(f"{self.name}'s hand is empty when play_card is called.")
+    #     return self.agent.select_action(game_state)
 
     def play_card(self, action: int) -> Card:
         """Removes and returns a card from the player hand.

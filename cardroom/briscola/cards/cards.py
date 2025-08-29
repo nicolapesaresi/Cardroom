@@ -79,6 +79,14 @@ class Card:
         """Returns card string."""
         return f"{self.face} of {self.suit}"
     
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return (self.suit_id == other.suit_id and
+                    self.rank == other.rank and
+                    self.points == other.points and
+                    self.suit == other.suit)
+        return False
+    
     def load_image(self, width: int, height: int, style:str = "bergamasche"):
         """Loads the image for the card.
         Args:
