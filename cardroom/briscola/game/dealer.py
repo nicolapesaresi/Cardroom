@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from cardroom.briscola.cards.cards import Card
 from cardroom.briscola.cards.cards import FACES, SUITS
 
@@ -67,12 +68,12 @@ class BriscolaDealer:
     def clone(self):
         """Creates a clone of the dealer, without any rendering attributes."""
         clone = BriscolaDealer(self.seed)
-        clone.deck = list(self.deck)
+        clone.deck = [copy.copy(card) for card in self.deck]
         for card in clone.deck:
             if hasattr(card, "image"):
                 del card.image
         clone.cards_left = self.cards_left
-        clone.spy = self.spy
+        clone.spy = copy.copy(self.spy)
         if hasattr(clone.spy, "image"):
             del clone.spy.image
         return clone

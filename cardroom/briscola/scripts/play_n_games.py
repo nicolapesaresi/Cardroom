@@ -1,9 +1,10 @@
 import argparse
-
+from tqdm import tqdm
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.game.player import BriscolaPlayer
 from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
+from cardroom.briscola.agents.bot import BotAgent
 from cardroom.briscola.agents.donatello import DonatelloAgent
 
 if __name__ == "__main__":
@@ -18,15 +19,16 @@ if __name__ == "__main__":
     
     #human = HumanAgent(input_mode=render_mode)
     random = RandomAgent()
-    donatello = DonatelloAgent()
-    names = ["Donatello", "Random"]
+    donatello = DonatelloAgent(simulations=100)
+    bot = BotAgent()
+    names = ["Donatello", "Bot"]
     results = []
 
-    for i in range(n_games):
+    for i in tqdm(range(n_games)):
         env = BriscolaEnv(names, render_mode=render_mode)
-        if render_mode == "pygame":
-            human.set_pygame_action_retriever(env.pygame)
-        agents = [donatello, random]
+        # if render_mode == "pygame":
+        #     human.set_pygame_action_retriever(env.pygame)
+        agents = [donatello, bot]
         
         while not env.done:
             player_id = env.current_player_id
@@ -40,9 +42,16 @@ if __name__ == "__main__":
         
         result = env.result
         results.append(result)
+
+        # partial summary
+        if i % (n_games // 10) == 0:
+            print("Partial Summary:")
+            print(f"{names[0]} wins: {results.count(1)}")
+            print(f"{names[1]} wins: {results.count(-1)}")
+            print(f"Draws: {results.count(0)}")
     
     # summary
-    print("Summary:")
+    print("Final Summary:")
     print(f"{names[0]} wins: {results.count(1)}")
     print(f"{names[1]} wins: {results.count(-1)}")
     print(f"Draws: {results.count(0)}")

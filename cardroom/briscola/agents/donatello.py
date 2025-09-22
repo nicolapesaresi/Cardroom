@@ -5,9 +5,10 @@ from cardroom.briscola.agents.algorithms.mcts import MCTSNode
 
 class DonatelloAgent(Agent):
     """Donatello agent class. Makes a decision with random tree search."""
-    def __init__(self, name: str = "Donatello", seed: int|None = None):
+    def __init__(self, name: str = "Donatello", simulations = 100, seed: int|None = None):
         """Instantiates agent."""
         super().__init__(name)
+        self.simulations = simulations
         if seed is not None:
             np.random.seed(seed)
         self.seed = seed
@@ -27,18 +28,21 @@ class DonatelloAgent(Agent):
     # def get_legal_actions(game_state: dict) -> list:
     #     """Retrieves legal actions froms state."""
 
-    def select_action(self, game_state: dict, env: BriscolaEnv) -> int:
+    def select_action(self, game_state: dict, env: BriscolaEnv, return_root: bool=False) -> int:
         """Makes a decision based on the processed state.
         Args:
             game_state: complete game state as returned from the env.
             env: cloned environment for MCTS simulations.
+            return_root: if True, returns also the root of MCTS tree.
         Returns:
             action: index of the card in hand to be played.
+            root_node: root of the MCTS tree.
         """
         n_cards = self.process_state(game_state)
 
         root_node = MCTSNode(game_state, env)
-        action = root_node.best_action(simulations=3)
+        action = root_node.best_action(simulations = self.simulations)
 
+        if return_root:
+            return action, root_node
         return action
-

@@ -12,7 +12,7 @@ if __name__ == "__main__":
     bot = BotAgent()
 
     names = ["Nick", "Donatello"]
-    agents = [human, bot]# donatello]
+    agents = [human, donatello]
     env = BriscolaEnv(names, "pygame")
 
     human.set_pygame_action_retriever(env.pygame) #TODO: this should probably be handled by an orchestrator
