@@ -10,7 +10,7 @@ First, install `poetry` if you haven't already, as indicated by the instructions
 Then, clone the repository to your local machine using the following command:
 ```
 git clone https://github.com/nicolapesaresi/Cardroom.git
-cd active-learning
+cd Cardroom
 ```
 Use Poetry to install the project dependencies:
 ```
