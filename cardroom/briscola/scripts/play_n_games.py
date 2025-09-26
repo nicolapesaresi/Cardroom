@@ -10,9 +10,11 @@ from cardroom.briscola.agents.donatello import DonatelloAgent
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("n_games", help="number of games to play")
+    parser.add_argument("oppo", help="opponent, random or bot")
     parser.add_argument("render_mode", help="text, pygame or None")
     args = parser.parse_args()
     n_games = int(args.n_games)
+    oppo = args.oppo
     render_mode = args.render_mode
     if render_mode == "None":
         render_mode = None
@@ -21,14 +23,24 @@ if __name__ == "__main__":
     random = RandomAgent()
     donatello = DonatelloAgent(simulations=100)
     bot = BotAgent()
-    names = ["Donatello", "Bot"]
+
+    if oppo == "random":
+        oppagent = random
+        oppname = "Random"
+    elif oppo == "bot":
+        oppagent = bot
+        oppname = "Bot"
+    else:
+        raise NotImplementedError("oppo must be one of ['random', 'bot']")
+
+    names = ["Donatello", oppname]
     results = []
 
     for i in tqdm(range(n_games)):
         env = BriscolaEnv(names, render_mode=render_mode)
         # if render_mode == "pygame":
         #     human.set_pygame_action_retriever(env.pygame)
-        agents = [donatello, bot]
+        agents = [donatello, oppagent]
         
         while not env.done:
             player_id = env.current_player_id

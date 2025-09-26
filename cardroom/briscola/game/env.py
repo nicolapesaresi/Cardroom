@@ -86,9 +86,10 @@ class BriscolaEnv:
         played_rank = []
         played_points = 0
         for card in self.cards_on_table:
+            effective_rank = card.rank
             if card.suit_id == first_suit_id:
-                card.rank += 50
-            played_rank.append(card.rank)
+                effective_rank += 50
+            played_rank.append(effective_rank)
             played_points += card.points
         winning_card_idx = played_rank.index(max(played_rank))
         winning_player_id = self.turn_order[winning_card_idx]
@@ -128,7 +129,7 @@ class BriscolaEnv:
         Returns:
             obs: observation of the game state for the current player.
         """
-        state = self.get_state()
+        state = self.get_state().copy()
         obs = {}
 
         # hide other player hand from player obs
