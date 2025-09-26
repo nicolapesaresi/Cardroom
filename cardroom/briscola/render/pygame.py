@@ -4,7 +4,7 @@ import os
 import sys
 import numpy as np
 
-from cardroom.briscola.cards.cards import Card, CardRetro
+from cardroom.briscola.game.cards import Card, CardRetro
 
 PYGAME_CONFIG = os.path.join(os.path.dirname(__file__), "render_config.yaml")
 

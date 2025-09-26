@@ -1,7 +1,7 @@
 import numpy as np
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.agents.agent import Agent
-from cardroom.briscola.agents.algorithms.mcts import MCTSNode
+from cardroom.briscola.agents.algorithms.mcts import ISMCTS
 
 class DonatelloAgent(Agent):
     """Donatello agent class. Makes a decision with random tree search."""
@@ -28,21 +28,29 @@ class DonatelloAgent(Agent):
     # def get_legal_actions(game_state: dict) -> list:
     #     """Retrieves legal actions froms state."""
 
-    def select_action(self, game_state: dict, env: BriscolaEnv, return_root: bool=False) -> int:
-        """Makes a decision based on the processed state.
+    def select_action(self, game_state: dict, env: BriscolaEnv, return_root: bool = False) -> int:
+        """
+        Makes a decision based on the processed state using Information-Set MCTS (ISMCTS).
+
         Args:
             game_state: complete game state as returned from the env.
             env: cloned environment for MCTS simulations.
-            return_root: if True, returns also the root of MCTS tree.
+            return_root: if True, also returns the root node of the ISMCTS tree.
+
         Returns:
             action: index of the card in hand to be played.
-            root_node: root of the MCTS tree.
+            root_node (optional): root InfoSetNode of the ISMCTS tree.
         """
-        n_cards = self.process_state(game_state)
+        # Convert environment to ISMCTS root
+        #TODO: pass here the parameters, cpuct and simulations, maybe from self
+        # ismcts = ISMCTS(root_env=env, cpuct=self.cpuct, rollout_policy=self.rollout_policy)
+        ismcts = ISMCTS(root_env=env, rollout_policy="bot")
 
-        root_node = MCTSNode(game_state, env)
-        action = root_node.best_action(simulations = self.simulations)
+        # Run simulations and select the best action
+        action = ismcts.select_action(self.simulations)
 
         if return_root:
+            root_node = ismcts.info_map[ismcts.root_key]
             return action, root_node
+
         return action

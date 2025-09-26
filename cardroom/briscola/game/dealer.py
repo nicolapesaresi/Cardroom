@@ -1,7 +1,7 @@
 import numpy as np
 import copy
-from cardroom.briscola.cards.cards import Card
-from cardroom.briscola.cards.cards import FACES, SUITS
+from cardroom.briscola.game.cards import Card
+from cardroom.briscola.game.cards import FACES, SUITS
 
 
 class BriscolaDealer:

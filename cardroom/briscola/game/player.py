@@ -1,4 +1,4 @@
-from cardroom.briscola.cards.cards import Card
+from cardroom.briscola.game.cards import Card
 # from cardroom.briscola.agents.agent import Agent
 
 class BriscolaPlayer:

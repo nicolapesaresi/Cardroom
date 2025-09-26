@@ -1,6 +1,6 @@
 import pytest
 from cardroom.briscola.game.env import BriscolaEnv
-from cardroom.briscola.cards.cards import Card
+from cardroom.briscola.game.cards import Card
 
 @pytest.fixture
 def env():
