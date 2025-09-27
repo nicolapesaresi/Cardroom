@@ -8,7 +8,7 @@ from cardroom.briscola.agents.bot import BotAgent
 if __name__ == "__main__":
     human = HumanAgent(input_mode="pygame")
     random = RandomAgent()
-    donatello = DonatelloAgent()
+    donatello = DonatelloAgent(simulations=5000)
     bot = BotAgent()
 
     names = ["Nick", "Donatello"]
