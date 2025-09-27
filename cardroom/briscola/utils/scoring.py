@@ -37,9 +37,13 @@ def play_game(agents: list, render_mode: str | None = None) -> tuple[str, dict]:
     
     result = env.result
     final_state = env.get_state()
-    winner_id = 0 if result == 1 else 1
-    winner_id = None if result == 0 else winner_id # draws
-    winner = final_state["player_names"][result] if winner_id is not None else "Draw"
+    if result == 1:
+        winner = final_state["player_names"][0]
+    elif result == -1:
+        winner = final_state["player_names"][1]
+    else:
+        winner = "Draw"
+
 
     return winner, final_state
 
@@ -58,18 +62,18 @@ def play_n_games(agents: list, n_games: int, render_mode: str|None = None) -> tu
     
     winners = []
     final_states = []
-    for i in tqdm(range(n_games)):
-        winner, state = play_game(agents, render_mode)
-        winners.append(winner)
-        final_states.append(state)
+    with tqdm(total=n_games, desc="Playing games...") as pbar:
+        for i in range(n_games):
+            winner, state = play_game(agents, render_mode)
+            winners.append(winner)
+            final_states.append(state)
 
-        # partial summary
-        if i % (n_games // 10) == 0:
-            print("Partial Summary:")
-            for agent in agents:
-                print(f"{agent.name} wins: {winners.count(agent.name)}")
-            print(f"Draws: {winners.count("Draw")}")
-    
+            # tqdm bar
+            desc_str = " | ".join([f"{agent.name} wins: {winners.count(agent.name)}" for agent in agents])
+            desc_str = desc_str + f" | Draws: {winners.count("Draws")}"
+            pbar.set_description(f"Playing games... ({desc_str})")
+            pbar.update(1)
+
     # summary
     print("Final Summary:")
     for agent in agents:

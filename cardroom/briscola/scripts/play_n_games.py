@@ -35,8 +35,7 @@ if __name__ == "__main__":
 
     results = []
 
-    for i in tqdm(range(n_games)):
-        agents = [donatello, oppagent]
-        env = BriscolaEnv([agent.name for agent in agents], render_mode=render_mode)
- 
-        winners, states = play_n_games(agents, n_games, render_mode)
+    agents = [donatello, oppagent]
+    env = BriscolaEnv([agent.name for agent in agents], render_mode=render_mode)
+
+    winners, states = play_n_games(agents, n_games, render_mode)
