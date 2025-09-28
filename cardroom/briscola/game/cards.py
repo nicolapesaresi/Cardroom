@@ -87,6 +87,15 @@ class Card:
                     self.suit == other.suit)
         return False
     
+    def get_image_path(self, style:str = "bergamasche"):
+        """Returns the path of the image of the card.
+        Args:
+            style: style of the card (bergamasche, french, etc.)
+        Returns:
+            image_path: path of the image.
+        """
+        return f"{CARD_IMAGES}/{style}/{self.suit}_{self.face_id}.png"
+
     def load_image(self, width: int, height: int, style:str = "bergamasche"):
         """Loads the image for the card.
         Args:
@@ -94,7 +103,7 @@ class Card:
             height: height of the card in pixels
             style: style of the card (bergamasche, french, etc.)
         """
-        self.image = pygame.image.load(f"{CARD_IMAGES}/{style}/{self.suit}_{self.face_id}.png")
+        self.image = pygame.image.load(self.get_image_path(style))
         self.image = pygame.transform.scale(self.image, (width, height))
 
 class CardRetro:

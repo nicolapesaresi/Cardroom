@@ -195,6 +195,14 @@ class BriscolaEnv:
             result = -1
         result = result
         return result, points
+    
+    def get_legal_actions(self) -> list:
+        """Returns legal actions at the current state of the game.
+        Returns:
+            legal_actions: list of legal actions for the current player.
+        """
+        obs = self.get_observation()
+        return list(range(len(obs["hand"])))
 
     def render(self):
         """Renders the current state of the game."""

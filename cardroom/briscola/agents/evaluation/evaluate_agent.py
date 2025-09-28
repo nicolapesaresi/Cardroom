@@ -17,7 +17,14 @@ from cardroom.briscola.agents.donatello import DonatelloAgent
 from cardroom.briscola.utils.scoring import play_n_games
 
 class EvaluateAgent:
+    """Evaluates agent play by simulating games against a range of opponents and computeing stats."""
     def __init__(self, agent: Agent, n_games: int, opponents: list[Agent] | None = None):
+        """Initializes evaluator.
+        Args:
+            agent: agent to evaluate.
+            n_games: number of games to play against each agent.
+            opponents: list of opponents.
+        """
         self.agent = agent
         self.n_games = n_games
         if opponents is None:
@@ -34,7 +41,8 @@ class EvaluateAgent:
             self.opponents = opponents
         self.results = pd.DataFrame(columns=["opponent", "winner", "game_index"])
 
-    def play_matches(self) -> tuple[list[str], list[dict]]:
+    def play_matches(self):
+        """Plays the matches against the opponents."""
         all_results = []
         for opp in tqdm(self.opponents):
             match_agents = [self.agent, opp]
@@ -48,7 +56,11 @@ class EvaluateAgent:
                 })
         self.results = pd.DataFrame(all_results)
 
-    def recap(self):
+    def recap(self) -> pd.DataFrame:
+        """Computes final statistics.
+        Returns:
+            summary: summary of statistics of the games.
+        """
         if self.results.empty:
             raise ValueError("No results. Run `self.play_matches()` first.")
 
@@ -75,6 +87,7 @@ class EvaluateAgent:
         return summary
 
     def plot_results(self, summary):
+        """Plots the results and returns the plot."""
         if self.results.empty:
             raise ValueError("No results. Run `self.play_matches()` first.")
 
@@ -122,7 +135,7 @@ class EvaluateAgent:
 
         # EV bar chart with color scale
         norm = mcolors.TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
-        cmap = plt.cm.coolwarm
+        cmap = plt.cm.RdYlGn
         ev_colors = cmap(norm(EV.values))
         bars_ev = axes[1].bar(opponents, EV, color=ev_colors)
         axes[1].set_ylabel("EV")
@@ -137,34 +150,41 @@ class EvaluateAgent:
 
         plt.tight_layout()
         plt.show()
+        return fig
 
 
     def run(self, print_recap:bool = True):
+        """Runs the evaluation pipeline: plays the games, calculates and plots results, saves results."""
         self.play_matches()
         summary = self.recap()
         if print_recap:
             print("=== Evaluation Recap ===")
             print(summary)
-        self.plot_results(summary)
+        fig = self.plot_results(summary)
+        self.save_results(plot = fig)
 
-    def save_results(self, recap_filepath: str|None=None, states_filepath: str|None=None):
+    def save_results(self, folder: str|None=None, plot=None):
+        """Saves results."""
         if self.results.empty:
             raise ValueError("No results to save. Run `self.play_matches()` first.")
         now = datetime.now()
         now_str = now.strftime("%Y-%m-%d_%H-%M-%S")
         csvname = "recap_" + self.agent.name + "_" + now_str + ".csv"
         picklename = "states_" + self.agent.name + "_" + now_str + ".pickle"
-        if recap_filepath is None:
+        if folder is None:
             csvpath = os.path.join(os.path.dirname(__file__), "../logs", now_str, csvname)
-        else:
-            csvpath = os.path.join(recap_filepath, csvname)
-        if states_filepath is None:
             picklepath = os.path.join(os.path.dirname(__file__), "../logs", now_str, picklename)
+            plotpath = os.path.join(os.path.dirname(__file__), "../logs", now_str, "results.png")
         else:
-            picklepath = os.path.join(states_filepath, picklename)
-        os.makedirs(os.path.dirname(csvpath), exist_ok=True)
-        os.makedirs(os.path.dirname(picklepath), exist_ok=True)
+            csvpath = os.path.join(folder, csvname)
+            picklepath = os.path.join(folder, picklename)
+            plotpath = os.path.join(folder, "results.png")
+        os.makedirs(folder, exist_ok=True)
+
         summary = self.recap()
         summary.to_csv(csvpath, index=True)
         with open(picklepath, "wb") as f:
             pickle.dump(self.results, f)
+
+        if plot is not None:
+            plot.savefig(plotpath)
