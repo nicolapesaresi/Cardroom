@@ -81,3 +81,54 @@ def play_n_games(agents: list, n_games: int, render_mode: str|None = None) -> tu
     print(f"Draws: {winners.count("Draw")}")
     
     return winners, final_states
+
+def play_flipped_games(base_agents: list, render_mode: str | None = None) -> tuple[list[str], list[dict]]:
+    """Plays two games of Briscola: one standard, and one where the env is flipped, meaning the two players play with opposite cards and same deck.
+    Args:
+        base_agents: list of agents to play the game (not flipped).
+        render_mode: rendering mode of the game, default is None.
+    Returns:
+        winners: string name of the winner (or 'Draw').
+        final_states: final state of the game.
+    """
+    winners = []
+    final_states = []
+
+    names = [agent.name for agent in base_agents]
+    base_env = BriscolaEnv(names, render_mode=render_mode)
+
+    # check valid agents
+    for agent in base_agents:
+        if not isinstance(agent, Agent):
+            raise NotImplementedError(f"Expected class Agent, got {type(agent)}")
+        if isinstance(agent, HumanAgent) and render_mode == "pygame":
+            agent.set_pygame_action_retriever(base_env.pygame)
+
+    flipped_env = base_env.clone()
+    # switch players
+    flipped_env.players[0].name = names[1]
+    flipped_env.players[1].name = names[0]
+    flipped_agents = [base_agents[1], base_agents[0]]
+
+    for env, agents in zip([base_env, flipped_env], [base_agents, flipped_agents]):
+        while not env.done:
+            player_id = env.current_player_id
+            agent = agents[player_id]
+            if isinstance(agent, DonatelloAgent): # ugly. should be the same call for all agents
+                action = agent.select_action(env.get_observation(), env.clone_from_observation())
+            else:
+                action = agent.select_action(env.get_observation())
+            env.step(action)
+        
+        result = env.result
+        final_state = env.get_state()
+        if result == 1:
+            winner = final_state["player_names"][0]
+        elif result == -1:
+            winner = final_state["player_names"][1]
+        else:
+            winner = "Draw"
+        winners.append(winner)
+        final_states.append(final_state)
+
+    return winners, final_states

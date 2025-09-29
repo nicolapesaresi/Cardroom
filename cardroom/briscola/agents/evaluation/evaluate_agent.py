@@ -14,7 +14,9 @@ from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
 from cardroom.briscola.agents.bot import BotAgent
 from cardroom.briscola.agents.donatello import DonatelloAgent
-from cardroom.briscola.utils.scoring import play_n_games
+from cardroom.briscola.utils.scoring import play_flipped_games
+from cardroom.briscola.agents.evaluation.evaluate_endgame import EndgameEvaluator
+from scipy.stats import binomtest
 
 class EvaluateAgent:
     """Evaluates agent play by simulating games against a range of opponents and computeing stats."""
@@ -46,21 +48,21 @@ class EvaluateAgent:
         all_results = []
         for opp in tqdm(self.opponents):
             match_agents = [self.agent, opp]
-            winners, states = play_n_games(match_agents, self.n_games, render_mode=None)
-            for i, (w, s) in enumerate(zip(winners, states)):
-                all_results.append({
-                    "opponent": opp.name,
-                    "game_index": i,
-                    "winner": w,
-                    "state": s
-                })
+
+            for j in range(self.n_games // 2):
+                winners, states = play_flipped_games(match_agents, render_mode=None)
+                for i, (w, s) in enumerate(zip(winners, states)):
+                    all_results.append({
+                        "opponent": opp.name,
+                        "game_index": j * 2 + i,  # keep a unique index across pairs
+                        "winner": w,
+                        "state": s
+                    })
+
         self.results = pd.DataFrame(all_results)
 
     def recap(self) -> pd.DataFrame:
-        """Computes final statistics.
-        Returns:
-            summary: summary of statistics of the games.
-        """
+        """Computes final statistics, including significance tests."""
         if self.results.empty:
             raise ValueError("No results. Run `self.play_matches()` first.")
 
@@ -77,12 +79,28 @@ class EvaluateAgent:
         win_rate = wins / total_games
         ev = (wins - losses) / total_games
 
+        # --- significance test ---
+        p_values = []
+        significant = []
+        for opp in opponents:
+            w = wins.loc[opp]
+            n = total_games - draws.loc[opp]  # exclude draws for the test
+            if n > 0:
+                res = binomtest(w, n, p=0.5, alternative="two-sided")
+                p_values.append(res.pvalue)
+                significant.append(res.pvalue < 0.05)
+            else:
+                p_values.append(np.nan)
+                significant.append(False)
+
         summary["wins"] = wins
         summary["draws"] = draws
         summary["losses"] = losses
         summary["total_games"] = total_games
         summary["win_rate"] = win_rate
         summary["EV"] = ev
+        summary["p_value"] = p_values
+        summary["significant"] = significant
 
         return summary
 
@@ -152,6 +170,11 @@ class EvaluateAgent:
         plt.show()
         return fig
 
+    def evaluate_endgames(self, n_endgames: int=500):
+        """Evaluates agent's endgame ability comparing with minimax optimal strategy."""
+        evaluator = EndgameEvaluator(self.agent)
+        results, fig = evaluator.evaluate_agent(n_endgames)
+        return results, fig
 
     def run(self, print_recap:bool = True):
         """Runs the evaluation pipeline: plays the games, calculates and plots results, saves results."""
@@ -161,9 +184,11 @@ class EvaluateAgent:
             print("=== Evaluation Recap ===")
             print(summary)
         fig = self.plot_results(summary)
-        self.save_results(plot = fig)
 
-    def save_results(self, folder: str|None=None, plot=None):
+        self.endgames, endgamefig = self.evaluate_endgames()
+        self.save_results(matchesplot = fig, endgameplot= endgamefig)
+
+    def save_results(self, folder: str|None=None, matchesplot=None, endgameplot=None):
         """Saves results."""
         if self.results.empty:
             raise ValueError("No results to save. Run `self.play_matches()` first.")
@@ -172,19 +197,22 @@ class EvaluateAgent:
         csvname = "recap_" + self.agent.name + "_" + now_str + ".csv"
         picklename = "states_" + self.agent.name + "_" + now_str + ".pickle"
         if folder is None:
-            csvpath = os.path.join(os.path.dirname(__file__), "../logs", now_str, csvname)
-            picklepath = os.path.join(os.path.dirname(__file__), "../logs", now_str, picklename)
-            plotpath = os.path.join(os.path.dirname(__file__), "../logs", now_str, "results.png")
-        else:
-            csvpath = os.path.join(folder, csvname)
-            picklepath = os.path.join(folder, picklename)
-            plotpath = os.path.join(folder, "results.png")
+            folder = os.path.join(os.path.dirname(__file__), "../logs", now_str)
         os.makedirs(folder, exist_ok=True)
+        csvpath = os.path.join(folder, csvname)
+        picklepath = os.path.join(folder, picklename)
+        matchesplotpath = os.path.join(folder, "matches.png")
+        endgamepickle = os.path.join(folder, "endgames.png")
+        endgameplotpath = os.path.join(folder, "endgames.png")
 
         summary = self.recap()
         summary.to_csv(csvpath, index=True)
         with open(picklepath, "wb") as f:
             pickle.dump(self.results, f)
+        with open(endgamepickle, "wb") as f:
+            pickle.dump(self.endgames, f)
 
-        if plot is not None:
-            plot.savefig(plotpath)
+        if matchesplot is not None:
+            matchesplot.savefig(matchesplotpath)
+        if endgameplot is not None:
+            matchesplot.savefig(endgameplotpath)
