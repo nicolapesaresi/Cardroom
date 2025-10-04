@@ -37,6 +37,7 @@ class BriscolaDealer:
         for card in self.deck:
             if card.suit_id == briscola_id:
                 card.rank += 100
+                card.is_briscola = True
 
 
     def get_cards_left(self) -> int:

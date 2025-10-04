@@ -53,6 +53,7 @@ class BriscolaEnv:
         self.done = False
         self.played_cards_history = []
         self.turn_history = []
+        self.trick_winners = []
         
         # clean up players and dealer
         self.dealer = BriscolaDealer()
@@ -93,6 +94,7 @@ class BriscolaEnv:
             played_points += card.points
         winning_card_idx = played_rank.index(max(played_rank))
         winning_player_id = self.turn_order[winning_card_idx]
+        self.trick_winners.append(winning_player_id)
         self.players[winning_player_id].points += played_points
         self.players[winning_player_id].taken_cards.extend(self.cards_on_table)
         # update turn order
@@ -120,6 +122,7 @@ class BriscolaEnv:
         state["taken_cards"] = [player.taken_cards for player in self.players]
         state["all_played_cards"] = self.played_cards_history
         state["turn_history"] = self.turn_history
+        state["trick_winners"] = self.trick_winners # who won each turn
         state["done"] = self.done
 
         return state

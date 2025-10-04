@@ -109,7 +109,7 @@ def play_flipped_games(base_agents: list, render_mode: str | None = None) -> tup
     flipped_env.players[0].name = names[1]
     flipped_env.players[1].name = names[0]
     flipped_agents = [base_agents[1], base_agents[0]]
-
+    
     for env, agents in zip([base_env, flipped_env], [base_agents, flipped_agents]):
         while not env.done:
             player_id = env.current_player_id
