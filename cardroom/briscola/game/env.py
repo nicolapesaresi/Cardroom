@@ -11,7 +11,7 @@ RENDER_MODES = [None, "text", "pygame"]
 
 class BriscolaEnv:
     """Environment for a game of Briscola."""
-    def __init__(self, names: list[str,str]|None, render_mode: str = "text"):
+    def __init__(self, names: list[str,str]|None=None, render_mode: str = "text"):
         """Instantiates the environment.
         Args:
             names: names of players who are going to play the game.

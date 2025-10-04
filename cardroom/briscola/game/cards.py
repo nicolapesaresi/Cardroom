@@ -70,6 +70,7 @@ class Card:
         self.points = POINTS[face_id]
         self.rank = RANK[face_id]
         self.card_tuple = (self.face, self.suit)
+        self.card_id = 10 * self.suit_id + self.face_id
         self.starting_x = 0
         self.starting_y = 120
 
