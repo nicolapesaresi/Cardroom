@@ -6,6 +6,8 @@ from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
 from cardroom.briscola.agents.bot import BotAgent
 from cardroom.briscola.agents.donatello import DonatelloAgent
+from cardroom.briscola.agents.superbot import SuperbotAgent
+from cardroom.briscola.agents.optimus import OptimusAgent
 
 from cardroom.briscola.utils.scoring import play_n_games
 
@@ -25,6 +27,8 @@ if __name__ == "__main__":
     random = RandomAgent()
     donatello = DonatelloAgent(simulations=200)
     bot = BotAgent()
+    superbot = SuperbotAgent()
+    optimus = OptimusAgent(depth=8)
 
     if oppo == "random":
         oppagent = random
@@ -35,7 +39,7 @@ if __name__ == "__main__":
 
     results = []
 
-    agents = [donatello, oppagent]
+    agents = [optimus, oppagent]
     env = BriscolaEnv([agent.name for agent in agents], render_mode=render_mode)
 
     winners, states = play_n_games(agents, n_games, render_mode)
