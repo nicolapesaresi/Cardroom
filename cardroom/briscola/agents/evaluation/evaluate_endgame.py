@@ -16,6 +16,8 @@ from cardroom.briscola.agents.agent import Agent
 from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
 from cardroom.briscola.agents.bot import BotAgent
+from cardroom.briscola.agents.superbot import SuperbotAgent
+from cardroom.briscola.agents.optimus import OptimusAgent
 from cardroom.briscola.agents.donatello import DonatelloAgent
 from cardroom.briscola.utils.scoring import play_n_games
 
@@ -349,6 +351,8 @@ class EndgameEvaluator:
                 obs = env_agent.get_observation()
                 if isinstance(self.agent, DonatelloAgent):
                     action = self.agent.select_action(obs, env_agent.clone_from_observation())
+                elif isinstance(self.agent, SuperbotAgent) or isinstance(self.agent, OptimusAgent):
+                    action = self.agent.select_action(obs, env_agent.clone())
                 else:
                     action = self.agent.select_action(obs)
 

@@ -6,6 +6,8 @@ from cardroom.briscola.agents.agent import Agent
 from cardroom.briscola.agents.random import RandomAgent
 from cardroom.briscola.agents.human import HumanAgent
 from cardroom.briscola.agents.bot import BotAgent
+from cardroom.briscola.agents.superbot import SuperbotAgent
+from cardroom.briscola.agents.optimus import OptimusAgent
 from cardroom.briscola.agents.donatello import DonatelloAgent
 
 def play_game(agents: list, render_mode: str | None = None) -> tuple[str, dict]:
@@ -31,6 +33,8 @@ def play_game(agents: list, render_mode: str | None = None) -> tuple[str, dict]:
         agent = agents[player_id]
         if isinstance(agent, DonatelloAgent): # ugly. should be the same call for all agents
             action = agent.select_action(env.get_observation(), env.clone_from_observation())
+        elif isinstance(agent, SuperbotAgent) or isinstance(agent, OptimusAgent):
+            action = agent.select_action(env.get_observation(), env.clone())
         else:
             action = agent.select_action(env.get_observation())
         env.step(action)
@@ -116,6 +120,8 @@ def play_flipped_games(base_agents: list, render_mode: str | None = None) -> tup
             agent = agents[player_id]
             if isinstance(agent, DonatelloAgent): # ugly. should be the same call for all agents
                 action = agent.select_action(env.get_observation(), env.clone_from_observation())
+            elif isinstance(agent, SuperbotAgent) or isinstance(agent, OptimusAgent):
+                action = agent.select_action(env.get_observation(), env.clone())
             else:
                 action = agent.select_action(env.get_observation())
             env.step(action)
