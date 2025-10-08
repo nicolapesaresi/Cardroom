@@ -1,7 +1,11 @@
 import numpy as np
+import torch.nn as nn
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.agents.agent import Agent
 from cardroom.briscola.agents.algorithms.mcts import ISMCTS
+import torch
+from cardroom.briscola.agents.algorithms.belief_state_network import BeliefMLP
+
 
 class DonatelloAgent(Agent):
     """Donatello agent class. Makes a decision with random tree search.
@@ -12,15 +16,32 @@ class DonatelloAgent(Agent):
         cpuct: exploration constant for MCTS.
         seed: optional seed for action selection.
     """
-    def __init__(self, name: str = "Donatello", simulations = 100, rollout_policy:str = "random", cpuct:float = 1.4, seed: int|None = None):
+    def __init__(self, name: str = "Donatello", simulations = 100, rollout_policy:str = "random", cpuct:float = 1.4, belief_model:nn.Module|None = None, use_belief:bool = True, det_temp: float=1.0, seed: int|None = None):
         """Instantiates agent."""
         super().__init__(name)
         self.simulations = simulations
         self.rollout_policy = rollout_policy
         self.cpuct = cpuct
+        self.belief_model = belief_model
+        self.use_belief = use_belief
+        if self.use_belief:
+            self.load_model()
+        self.det_temp = det_temp
         if seed is not None:
             np.random.seed(seed)
         self.seed = seed
+
+    def load_model(self):
+        #TODO: change path and model loading to take path
+        default_model_path = "/Users/nicola/Desktop/vscode/Cardroom/wandb/offline-run-20251005_165738-rh9q42p3/files/runs/briscola_belief_v1/checkpoints/best.pt" 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        if self.belief_model is None:
+            model = BeliefMLP()
+            payload = torch.load(default_model_path, map_location=device)
+            model.load_state_dict(payload["model"])
+        model.to(device)
+        model.eval()
 
     @staticmethod
     def process_state(game_state: dict) -> int:
@@ -52,8 +73,10 @@ class DonatelloAgent(Agent):
             info_map (optional): info_map of the ISMCTS tree.
         """
         # Convert environment to ISMCTS root
-        ismcts = ISMCTS(root_env=env, cpuct=self.cpuct, rollout_policy=self.rollout_policy)
-
+        device = str(next(self.belief_model.parameters()).device) if self.belief_model is not None else "cpu"
+        ismcts = ISMCTS(root_env=env, model=self.belief_model, device=device, cpuct=self.cpuct,
+                rollout_policy=self.rollout_policy, use_belief=self.use_belief,
+                determinization_temp=self.det_temp)
         # Run simulations and select the best action
         action = ismcts.select_action(self.simulations)
 

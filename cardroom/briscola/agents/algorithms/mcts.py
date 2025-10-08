@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Any, List, Optional
 
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.agents.bot import BotAgent  # optional rollout policy
-
+from cardroom.briscola.utils.belief_state_cloning import determinize_with_belief
 
 def obs_to_key(obs: dict) -> Tuple:
     """
@@ -62,16 +62,40 @@ class ISMCTS:
     - rollout with provided policy (random or BotAgent)
     """
 
-    def __init__(self, root_env: BriscolaEnv, cpuct: float = 1.4, rollout_policy: str = "random"):
+    def __init__(
+        self,
+        root_env: BriscolaEnv,
+        model=None,
+        device='cpu',
+        cpuct: float = 1.4,
+        rollout_policy: str = "random",
+        use_belief: bool = False,
+        determinization_temp: float = 1.0,
+    ):
         self.root_env = root_env
         root_obs = self.root_env.get_observation()
         self.root_key = obs_to_key(root_obs)
-        self.info_map: Dict[Tuple, InfoSetNode] = {}
+        self.info_map = {}
         self.cpuct = cpuct
         self.rollout_policy = rollout_policy
 
-        # create root node
+        # belief integration
+        self.model = model
+        self.device = device
+        self.use_belief = use_belief
+        self.determinization_temp = determinization_temp
+
+        # root node
         self._get_node(self.root_key, root_obs)
+
+    def _determinize(self):
+        """Choose determinization method based on the toggle."""
+        if self.use_belief and (self.model is not None):
+            return determinize_with_belief(
+                self.root_env, self.model, device=self.device, temperature=self.determinization_temp
+            )
+        # fallback: original behavior
+        return self.root_env.clone_from_observation()
 
     def _get_node(self, key: Tuple, obs: Optional[dict] = None) -> InfoSetNode:
         """Return node for key; create it using obs if it doesn't exist."""
@@ -84,13 +108,11 @@ class ISMCTS:
         return node
 
     def select_action(self, simulations: int = 200) -> int:
-        """Run many simulations and return best action (by visit count) from root."""
         for _ in range(simulations):
-            env_det = self.root_env.clone_from_observation()  # sample determinization
+            env_det = self._determinize()
             self._run_simulation(env_det)
 
         root_node = self.info_map[self.root_key]
-        # choose action with max visits (tie-break randomly)
         best_action = max(root_node.legal_actions, key=lambda a: (root_node.N.get(a, 0), -np.random.random()))
         return int(best_action)
 
