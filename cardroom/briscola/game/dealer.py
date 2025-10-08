@@ -1,6 +1,7 @@
 import numpy as np
-from cardroom.briscola.cards.cards import Card
-from cardroom.briscola.cards.cards import FACES, SUITS
+import copy
+from cardroom.briscola.game.cards import Card
+from cardroom.briscola.game.cards import FACES, SUITS
 
 
 class BriscolaDealer:
@@ -38,14 +39,21 @@ class BriscolaDealer:
                 card.rank += 100
 
 
+    def get_cards_left(self) -> int:
+        """Returns the number of the cards in the deck.
+        Returns:
+            number of cards left in the deck."""
+        return len(self.deck)
+
     def deal(self) -> Card:
         """Removes and returns the last card in the deck.
         Returns:
             card"""
         if self.cards_left == 0:
             raise IndexError("Cannot deal a new card, deck is empty.")
-        self.cards_left -= 1
-        return self.deck.pop()
+        card = self.deck.pop()
+        self.cards_left = self.get_cards_left()
+        return card
     
     @staticmethod
     def draw_starting_player(n_players: int) -> int:
@@ -57,6 +65,18 @@ class BriscolaDealer:
         """
         return np.random.randint(n_players)
     
+    def clone(self):
+        """Creates a clone of the dealer, without any rendering attributes."""
+        clone = BriscolaDealer(self.seed)
+        clone.deck = [copy.copy(card) for card in self.deck]
+        for card in clone.deck:
+            if hasattr(card, "image"):
+                del card.image
+        clone.cards_left = self.cards_left
+        clone.spy = copy.copy(self.spy)
+        if hasattr(clone.spy, "image"):
+            del clone.spy.image
+        return clone
 
 
 
