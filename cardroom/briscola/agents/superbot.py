@@ -1,12 +1,14 @@
 import numpy as np
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.agents.agent import Agent
+from cardroom.briscola.agents.bot import BotAgent
 
 class SuperbotAgent(Agent):
     """Superbot agent class. Makes algotithmic decisions like Bot, but with perfect finals."""
-    def __init__(self, name: str = "BotAgent"):
+    def __init__(self, name: str = "SuperbotAgent"):
         """Instantiates agent."""
         super().__init__(name)
+        self.bot = BotAgent()
 
     @staticmethod
     def process_state(game_state: dict) -> dict:
@@ -32,13 +34,7 @@ class SuperbotAgent(Agent):
         cards_remaining = 40 - len(game_state["all_played_cards"])
         
         if cards_remaining > 6:
-            if len(cards_on_table) == 0:
-                # I play the lowest point,rank card
-                action = min(enumerate(hand), key=lambda x: (x[1].points,x[1].rank))[0]
-            else:
-                indexed_hand = list(enumerate(hand))
-                sorted_hand = sorted(indexed_hand, key=self.make_card_sort_key(cards_on_table[0], briscola_suit_id))
-                action = sorted_hand[0][0]
+            action = self.bot.select_action(game_state)
         else:
             action, point_proj = self.optimal_play(env, game_state, cards_remaining)
             #print("Proiezione punti:  ", int(point_proj), " - ", 120 - int(point_proj))

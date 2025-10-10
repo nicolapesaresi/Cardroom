@@ -4,6 +4,7 @@ import itertools
 import copy
 from cardroom.briscola.game.env import BriscolaEnv
 from cardroom.briscola.agents.agent import Agent
+from cardroom.briscola.agents.bot import BotAgent
 from cardroom.briscola.game.cards import Card, FACES, SUITS
 
 class OptimusAgent(Agent):
@@ -13,6 +14,7 @@ class OptimusAgent(Agent):
         """Instantiates agent."""
         super().__init__(name)
         self.depth = depth
+        self.bot = BotAgent()
 
     @staticmethod
     def process_state(game_state: dict) -> dict:
@@ -41,13 +43,7 @@ class OptimusAgent(Agent):
             action, point_proj = self.optimal_play(env, game_state, cards_remaining)
         #plays like a bot
         elif cards_remaining > self.depth:
-            if len(cards_on_table) == 0:
-                # I play the lowest point,rank card
-                action = min(enumerate(hand), key=lambda x: (x[1].points,x[1].rank))[0]
-            else:
-                indexed_hand = list(enumerate(hand))
-                sorted_hand = sorted(indexed_hand, key=self.make_card_sort_key(cards_on_table[0], briscola_suit_id))
-                action = sorted_hand[0][0]
+            action = self.bot.select_action(game_state)
         else:
             action, point_proj = self.best_expected_value_play(env, game_state, cards_remaining)
 
