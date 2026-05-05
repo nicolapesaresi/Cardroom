@@ -1,0 +1,11 @@
+[package]
+name = "briscola"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = { workspace = true }
+strum = { workspace = true }
+
+[dev-dependencies]
+rstest = { workspace = true }
