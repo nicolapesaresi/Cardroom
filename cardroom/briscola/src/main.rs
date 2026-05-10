@@ -4,11 +4,12 @@ use briscola::agents::random::RandomAgent;
 use briscola::env::env::BriscolaEnv;
 
 fn main() {
-    let mut env = BriscolaEnv::new();
     let agents: Vec<Box<dyn BriscolaAgent>> = vec![
         Box::new(HumanAgent::new()),
         Box::new(RandomAgent::new()),
     ];
+    let names: Vec<String> = agents.iter().map(|a| a.name().to_string()).collect();
+    let mut env = BriscolaEnv::new_with_names(names);
 
     env.render();
 

@@ -28,6 +28,7 @@ impl BriscolaAction {
     }
 }
 
+#[derive(Clone)]
 pub struct BriscolaPlayer {
     pub name: String,
     pub points: i32,

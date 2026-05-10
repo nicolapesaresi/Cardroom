@@ -9,7 +9,7 @@ pub struct BotAgent {
 
 impl BotAgent {
     pub fn new() -> Self {
-        Self { name: format!("BotAgent") }
+        Self { name: format!("Bot") }
     }
 
     fn card_sort_key(card: &BriscolaCard, card_on_table: &BriscolaCard, briscola_suit: BriscolaSuit) -> (i32, i32) {
@@ -47,6 +47,8 @@ impl BotAgent {
 }
 
 impl BriscolaAgent for BotAgent {
+    fn name(&self) -> &str { &self.name }
+
     fn select_action(&self, env: &BriscolaEnv) -> BriscolaAction {
         let legal_actions = env.get_legal_actions();
         let hand = &env.players[env.current_player_id].hand;

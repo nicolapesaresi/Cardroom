@@ -21,6 +21,21 @@ impl BriscolaResult {
     }
 }
 
+#[derive(Clone)]
+pub struct BriscolaState {
+    pub n_players: usize,
+    pub players: Vec<BriscolaPlayer>,
+    pub done: bool,
+    pub played_cards_history: Vec<BriscolaCard>,
+    pub turn_history: Vec<usize>,
+    pub dealer: BriscolaDealer,
+    pub cards_on_table: Vec<BriscolaCard>,
+    pub current_player_id: usize,
+    pub turn_order: Vec<usize>,
+    pub turn_counter: u8,
+    pub result: BriscolaResult,
+}
+
 pub struct BriscolaEnv {
     pub n_players: usize,
     pub players: Vec<BriscolaPlayer>,
@@ -38,17 +53,23 @@ pub struct BriscolaEnv {
 impl BriscolaEnv {
     pub fn new() -> Self {
         let n_players = 2;
+        let names: Vec<String> = (0..n_players).map(|i| format!("Player_{}", i)).collect();
+        Self::new_with_names(names)
+    }
+
+    pub fn new_with_names(names: Vec<String>) -> Self {
+        let n_players = names.len();
         let done = false;
         let mut players = vec![];
         let dealer = BriscolaDealer::new();
-        for i in 0..n_players {
-            players.push(BriscolaPlayer::new(format!("Player_{}",i)));
+        for name in names {
+            players.push(BriscolaPlayer::new(name));
         }
         let cards_on_table = vec![];
         let played_cards_history = vec![];
         let turn_history = vec![];
         let current_player_id = 0;
-        let turn_order = vec![0,1];
+        let turn_order: Vec<usize> = (0..n_players).collect();
         let turn_counter = 1;
         let result = BriscolaResult::InProgress;
 
@@ -139,6 +160,22 @@ impl BriscolaEnv {
                     self.players[*id].hand.push(self.dealer.deal());
                 }
             }
+        }
+    }
+
+    pub fn get_state(&self) -> BriscolaState {
+        BriscolaState {
+            n_players: self.n_players,
+            players: self.players.clone(),
+            done: self.done,
+            played_cards_history: self.played_cards_history.clone(),
+            turn_history: self.turn_history.clone(),
+            dealer: self.dealer.clone(),
+            cards_on_table: self.cards_on_table.clone(),
+            current_player_id: self.current_player_id,
+            turn_order: self.turn_order.clone(),
+            turn_counter: self.turn_counter,
+            result: self.result,
         }
     }
 

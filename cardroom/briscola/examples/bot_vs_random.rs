@@ -15,8 +15,9 @@ fn main() {
         Box::new(BotAgent::new()),
         Box::new(RandomAgent::new()),
     ];
+    let names: Vec<String> = agents.iter().map(|a| a.name().to_string()).collect();
 
-    let mut env = BriscolaEnv::new();
+    let mut env = BriscolaEnv::new_with_names(names);
     let mut bot_wins = 0usize;
     let mut random_wins = 0usize;
     let mut draws = 0usize;

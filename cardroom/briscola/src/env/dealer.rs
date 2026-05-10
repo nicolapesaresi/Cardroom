@@ -2,6 +2,7 @@ use rand::seq::SliceRandom;
 use strum::IntoEnumIterator;
 use super::cards::{BriscolaCard, BriscolaFace, BriscolaSuit};
 
+#[derive(Clone)]
 pub struct BriscolaDealer {
     pub deck: Vec<BriscolaCard>,
     pub briscola: BriscolaSuit,

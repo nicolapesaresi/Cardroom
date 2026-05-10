@@ -15,6 +15,8 @@ impl HumanAgent {
 }
 
 impl BriscolaAgent for HumanAgent {
+    fn name(&self) -> &str { &self.name }
+
     fn select_action(&self, env: &BriscolaEnv) -> BriscolaAction {
         let legal_actions = env.get_legal_actions();
 

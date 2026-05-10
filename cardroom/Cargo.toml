@@ -1,5 +1,5 @@
 [workspace]
-members = ["briscola"]
+members = ["briscola", "cardroom-gdext"]
 resolver = "2"
 
 [workspace.dependencies]
