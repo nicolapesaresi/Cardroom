@@ -27,21 +27,24 @@ var result_panel: Node = null
 var card_width: float = 0.0
 var card_height: float = 0.0
 
-var HAND_CENTER = DisplayServer.screen_get_size()[0] / 2
-var HAND_P0_Y = DisplayServer.screen_get_size()[1] * 0.85
-var HAND_P1_Y = DisplayServer.screen_get_size()[1] * 0.15
-var HAND_CARDS_OFFSET = DisplayServer.screen_get_size()[1] * 0.05
-var DECK_X = DisplayServer.screen_get_size()[0] * 0.10
-var DECK_Y = DisplayServer.screen_get_size()[1] * 0.4
-var DECK_Y_OFFSET = DisplayServer.screen_get_size()[1] * 0.001
-var CARD_P0_X = DisplayServer.screen_get_size()[0] * 0.55
-var CARD_P0_Y = DisplayServer.screen_get_size()[1] * 0.55
-var CARD_P1_X = DisplayServer.screen_get_size()[0] * 0.45
-var CARD_P1_Y = DisplayServer.screen_get_size()[1] * 0.45
-var TAKEN_X = DisplayServer.screen_get_size()[0] * 0.82
+var screen_size: Vector2
+var HAND_CENTER: float
+var HAND_P0_Y: float
+var HAND_P1_Y: float
+var HAND_CARDS_OFFSET: float
+var DECK_X: float
+var DECK_Y: float
+var DECK_Y_OFFSET: float
+var CARD_P0_X: float
+var CARD_P0_Y: float
+var CARD_P1_Y: float
+var CARD_P1_X: float
+var TAKEN_X: float
 
 
 func _ready() -> void:
+	set_screen()
+	
 	env = BriscolaEnvNode.new()
 	add_child(env)
 	env.init_with_names(PackedStringArray([GameConfig.p0_agent, GameConfig.p1_agent]))
@@ -439,3 +442,19 @@ func _spawn_card(card_dict, pos: Vector2, covered: bool) -> Node:
 
 func _on_card_clicked(action_idx: int) -> void:
 	human_action_selected.emit(action_idx)
+
+func set_screen() -> void:
+	screen_size = get_viewport().get_visible_rect().size
+	
+	HAND_CENTER = screen_size.x / 2
+	HAND_P0_Y = screen_size.y * 0.85
+	HAND_P1_Y = screen_size.y * 0.15
+	HAND_CARDS_OFFSET = screen_size.y * 0.05
+	DECK_X = screen_size.x * 0.10
+	DECK_Y = screen_size.y * 0.4
+	DECK_Y_OFFSET = screen_size.y * 0.001
+	CARD_P0_X = screen_size.x * 0.55
+	CARD_P0_Y = screen_size.y * 0.55
+	CARD_P1_X = screen_size.x * 0.45
+	CARD_P1_Y = screen_size.y * 0.45
+	TAKEN_X = screen_size.x * 0.82
