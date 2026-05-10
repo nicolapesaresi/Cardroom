@@ -1,0 +1,12 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.3
+reloadable = true
+
+[libraries]
+macos.debug    = "res://../cardroom/target/debug/libcardroom_gdext.dylib"
+macos.release  = "res://../cardroom/target/release/libcardroom_gdext.dylib"
+linux.debug    = "res://../cardroom/target/debug/libcardroom_gdext.so"
+linux.release  = "res://../cardroom/target/release/libcardroom_gdext.so"
+windows.debug  = "res://../cardroom/target/debug/cardroom_gdext.dll"
+windows.release = "res://../cardroom/target/release/cardroom_gdext.dll"

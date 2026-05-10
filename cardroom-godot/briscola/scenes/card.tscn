@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://x1sjg136jd41"]
+
+[ext_resource type="Script" uid="uid://bj0hpwo5rik6s" path="res://briscola/scripts/card.gd" id="1_wooyy"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_sbm4y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rah3g"]
+size = Vector2(94, 140)
+
+[node name="Card" type="Node2D" unique_id=631072772]
+position = Vector2(581, 319)
+script = ExtResource("1_wooyy")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=229465641]
+offset_left = -48.0
+offset_top = -71.0
+offset_right = 48.0
+offset_bottom = 70.0
+texture = SubResource("PlaceholderTexture2D_sbm4y")
+expand_mode = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=278154102]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1889801797]
+shape = SubResource("RectangleShape2D_rah3g")
