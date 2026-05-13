@@ -1,7 +1,8 @@
 use super::generic::BriscolaAgent;
 use crate::env::cards::{BriscolaCard, BriscolaSuit};
-use crate::env::env::BriscolaEnv;
+use crate::env::env::{BriscolaEnv, BriscolaObs};
 use crate::env::player::BriscolaAction;
+use crate::env::utils::env_from_obs;
 
 pub struct BotAgent {
     name: String,
@@ -49,7 +50,8 @@ impl BotAgent {
 impl BriscolaAgent for BotAgent {
     fn name(&self) -> &str { &self.name }
 
-    fn select_action(&self, env: &BriscolaEnv) -> BriscolaAction {
+    fn select_action(&self, obs: BriscolaObs) -> BriscolaAction {
+        let env = env_from_obs(&obs);
         let legal_actions = env.get_legal_actions();
         let hand = &env.players[env.current_player_id].hand;
         let briscola_suit = env.dealer.briscola;

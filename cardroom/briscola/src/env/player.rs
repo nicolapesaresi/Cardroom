@@ -2,12 +2,13 @@ use strum::IntoEnumIterator;
 use strum::EnumIter;
 use super::cards::BriscolaCard;
 
-#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum BriscolaAction {
     Card0,
     Card1,
     Card2,
 }
+
 
 impl BriscolaAction {
     pub fn idx(&self) -> usize {

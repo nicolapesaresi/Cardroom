@@ -9,3 +9,4 @@ strum = { workspace = true }
 
 [dev-dependencies]
 rstest = { workspace = true }
+indicatif = "0.17"

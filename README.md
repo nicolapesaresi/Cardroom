@@ -44,5 +44,5 @@ Alternatively, you can enter the game subfolder and run the main script to play 
 cd cardroom/briscola
 cargo build                            # compile in debug mode
 cargo run                              # compile and run main.rs
-cargo run --example bot_vs_random      # compile and run a script in /examples
+cargo run --example play_n_games -- bot random 100   # run N games between two agents
 ```

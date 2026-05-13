@@ -1,7 +1,7 @@
 use strum::IntoEnumIterator;
 use strum::EnumIter;
 
-#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum BriscolaFace {
     Ace,
     Two,
@@ -94,7 +94,7 @@ impl BriscolaFace {
 }
 
 
-#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum BriscolaSuit {
     Ori,
     Coppe,
@@ -122,25 +122,23 @@ impl BriscolaSuit {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct BriscolaCard {
     pub face: BriscolaFace,
     pub suit: BriscolaSuit,
     pub rank: i32,
     pub points: i32,
-    pub name: String,
     pub is_briscola: bool,
 }
 
 impl BriscolaCard {
     pub fn new(face: BriscolaFace, suit: BriscolaSuit) -> Self {
-        let name = format!("{} of {}", face.name(), suit.name());
         let rank = face.rank();
         let points = face.points();
-        Self { face, suit, name, rank, points, is_briscola: false }
+        Self { face, suit, rank, points, is_briscola: false }
     }
 
-    pub fn name(&self) -> &str { &self.name }
+    pub fn name(&self) -> String { format!("{} of {}", self.face.name(), self.suit.name()) }
     pub fn points(&self) -> i32 { self.points }
     pub fn rank(&self) -> i32 { self.rank }
     pub fn is_briscola(&self) -> bool { self.is_briscola }

@@ -77,6 +77,8 @@ func _make_agent_node(agent_name: String) -> Node:
 			return RandomAgentNode.new()
 		GameConfig.BOT:
 			return BotAgentNode.new()
+		GameConfig.MCTS:
+			return MCTSAgentNode.new()
 		_:
 			return null
 

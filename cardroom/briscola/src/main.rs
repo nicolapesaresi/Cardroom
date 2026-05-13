@@ -14,7 +14,7 @@ fn main() {
     env.render();
 
     while !env.done {
-        let action = agents[env.current_player_id].select_action(&env);
+        let action = agents[env.current_player_id].select_action(env.get_obs());
         env.step(action);
         env.render();
     }

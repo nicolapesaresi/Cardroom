@@ -1,8 +1,9 @@
 use std::io;
 use std::io::Write;
 use super::generic::BriscolaAgent;
-use crate::env::env::BriscolaEnv;
+use crate::env::env::BriscolaObs;
 use crate::env::player::BriscolaAction;
+use crate::env::utils::env_from_obs;
 
 pub struct HumanAgent {
     name: String,
@@ -17,13 +18,14 @@ impl HumanAgent {
 impl BriscolaAgent for HumanAgent {
     fn name(&self) -> &str { &self.name }
 
-    fn select_action(&self, env: &BriscolaEnv) -> BriscolaAction {
+    fn select_action(&self, obs: BriscolaObs) -> BriscolaAction {
+        let env = env_from_obs(&obs);
         let legal_actions = env.get_legal_actions();
 
         loop {
             print!("Enter action ");
             for action in &legal_actions {
-                print!("[{}]-{} ", action.idx(), env.players[env.current_player_id].hand[action.idx()].name);
+                print!("[{}]-{} ", action.idx(), env.players[env.current_player_id].hand[action.idx()].name());
             }
             print!(": ");
             io::stdout().flush().expect("Failed to flush stdout");
