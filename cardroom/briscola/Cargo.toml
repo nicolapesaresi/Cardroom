@@ -6,7 +6,8 @@ edition = "2024"
 [dependencies]
 rand = { workspace = true }
 strum = { workspace = true }
+indicatif = "0.17"
 
 [dev-dependencies]
 rstest = { workspace = true }
-indicatif = "0.17"
+

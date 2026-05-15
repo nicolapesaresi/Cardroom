@@ -15,7 +15,7 @@ pub struct RandomAgentNode {
 #[godot_api]
 impl INode for RandomAgentNode {
     fn init(base: Base<Node>) -> Self {
-        Self { inner: RandomAgent::new(), base }
+        Self { inner: RandomAgent::default(), base }
     }
 }
 
@@ -37,7 +37,7 @@ pub struct BotAgentNode {
 #[godot_api]
 impl INode for BotAgentNode {
     fn init(base: Base<Node>) -> Self {
-        Self { inner: BotAgent::new(), base }
+        Self { inner: BotAgent::default(), base }
     }
 }
 
@@ -59,7 +59,7 @@ pub struct MCTSAgentNode {
 #[godot_api]
 impl INode for MCTSAgentNode {
     fn init(base: Base<Node>) -> Self {
-        Self { inner: MCTSAgent::new(1000), base }
+        Self { inner: MCTSAgent::default(), base }
     }
 }
 

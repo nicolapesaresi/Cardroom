@@ -99,6 +99,26 @@ impl BriscolaEnv {
         env
     }
 
+    pub fn reset_with_deck(&mut self, deck: Vec<BriscolaCard>) {
+        self.done = false;
+        self.played_cards_history = vec![];
+        self.turn_history = vec![];
+        self.dealer = BriscolaDealer::from_deck(deck);
+        self.result = BriscolaResult::InProgress;
+        for player in &mut self.players {
+            player.reset();
+        }
+        self.current_player_id = 0;
+        self.set_turn_order(0);
+        for &id in &self.turn_order {
+            let player = &mut self.players[id];
+            for _ in 0..3 {
+                player.hand.push(self.dealer.deal());
+            }
+        }
+        self.turn_counter = 1;
+    }
+
     pub fn reset(&mut self) {
         self.done = false;
         self.played_cards_history = vec![];

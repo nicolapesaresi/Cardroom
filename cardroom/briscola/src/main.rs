@@ -1,12 +1,12 @@
 use briscola::agents::generic::BriscolaAgent;
 use briscola::agents::human::HumanAgent;
-use briscola::agents::random::RandomAgent;
+use briscola::agents::mcts::MCTSAgent;
 use briscola::env::env::BriscolaEnv;
 
 fn main() {
     let agents: Vec<Box<dyn BriscolaAgent>> = vec![
-        Box::new(HumanAgent::new()),
-        Box::new(RandomAgent::new()),
+        Box::new(HumanAgent::default()),
+        Box::new(MCTSAgent::default()),
     ];
     let names: Vec<String> = agents.iter().map(|a| a.name().to_string()).collect();
     let mut env = BriscolaEnv::new_with_names(names);

@@ -8,10 +8,15 @@ use crate::env::utils::env_from_obs;
 pub struct HumanAgent {
     name: String,
 }
+impl Default for HumanAgent {
+    fn default() -> Self {
+        Self { name: format!("Human") }
+    }
+}
 
 impl HumanAgent {
-    pub fn new() -> Self {
-        Self { name: format!("Human") }
+    pub fn new(name: String) -> Self {
+        Self { name: name }
     }
 }
 

@@ -9,15 +9,23 @@ pub struct MCTSAgent {
     simulations: usize,
 }
 
+impl Default for MCTSAgent {
+    fn default() -> Self {
+        Self{name: format!("MCTS"), simulations: 500}
+    }
+}
+
 impl MCTSAgent {
-    pub fn new(simulations: usize) -> Self {
-        Self{name: format!("MCTS"), simulations}
+    pub fn new(name: String, simulations: usize) -> Self {
+        Self{name, simulations}
     }
 }
 
 impl BriscolaAgent for MCTSAgent {
-    fn name(&self) -> &str { &self.name }
-
+    fn name(&self) -> &str {
+        &self.name
+    }
+    
     fn select_action(&self, obs: BriscolaObs) -> BriscolaAction {
         naive_mcts(obs, self.simulations)
     }

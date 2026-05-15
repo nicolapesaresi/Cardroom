@@ -8,9 +8,15 @@ pub struct RandomAgent {
     name: String,
 }
 
-impl RandomAgent {
-    pub fn new() -> Self {
+impl Default for RandomAgent {
+    fn default() -> Self {
         Self{name: format!("Random")}
+    }
+}
+
+impl RandomAgent {
+    pub fn new(name: String) -> Self {
+        Self { name: name }
     }
 }
 

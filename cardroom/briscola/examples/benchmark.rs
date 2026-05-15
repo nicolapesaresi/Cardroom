@@ -1,18 +1,18 @@
 use briscola::agents::utils::make_agent;
-use briscola::utils::playing::play_n_games;
+use briscola::utils::benchmark::benchmark_n_games;
 
-const DEFAULT_N_GAMES: usize = 100;
+const DEFAULT_N_ROUNDS: usize = 100;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
-        eprintln!("Usage: play_n_games <agent0> <agent1> [n_games]");
+        eprintln!("Usage: benchmark <agent0> <agent1> [n_rounds]");
         eprintln!("Available agents: bot, random, mcts, human");
         std::process::exit(1);
     }
 
-    let n_games: usize = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(DEFAULT_N_GAMES);
+    let n_rounds: usize = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(DEFAULT_N_ROUNDS);
     let agents = vec![make_agent(&args[1]), make_agent(&args[2])];
 
-    play_n_games(agents, n_games);
+    benchmark_n_games(agents, n_rounds);
 }

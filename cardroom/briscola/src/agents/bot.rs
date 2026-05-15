@@ -8,9 +8,14 @@ pub struct BotAgent {
     name: String,
 }
 
-impl BotAgent {
-    pub fn new() -> Self {
+impl Default for BotAgent {
+    fn default() -> Self {
         Self { name: format!("Bot") }
+    }
+}
+impl BotAgent {
+    pub fn new(name:String) -> Self {
+        Self { name }
     }
 
     fn card_sort_key(card: &BriscolaCard, card_on_table: &BriscolaCard, briscola_suit: BriscolaSuit) -> (i32, i32) {

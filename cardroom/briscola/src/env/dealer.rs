@@ -35,6 +35,11 @@ impl BriscolaDealer {
         self.deck.shuffle(&mut rand::rng());
     }
 
+    pub fn from_deck(deck: Vec<BriscolaCard>) -> Self {
+        let briscola = deck[0].suit;
+        Self { deck, briscola }
+    }
+
     pub fn deal(&mut self) -> BriscolaCard {
         self.deck.pop().expect("No cards left to deal.")
     }
