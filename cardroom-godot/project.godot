@@ -21,9 +21,8 @@ config/main_scene="res://briscola/scenes/menu.tscn"
 GameConfig="*res://briscola/scripts/game_config.gd"
 
 [display]
-window/dpi/allow_hidpi=true
+
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 
 [physics]
 

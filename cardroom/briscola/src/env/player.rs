@@ -1,4 +1,3 @@
-use strum::IntoEnumIterator;
 use strum::EnumIter;
 use super::cards::BriscolaCard;
 

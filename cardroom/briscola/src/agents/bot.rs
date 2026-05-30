@@ -1,6 +1,6 @@
 use super::generic::BriscolaAgent;
 use crate::env::cards::{BriscolaCard, BriscolaSuit};
-use crate::env::env::{BriscolaEnv, BriscolaObs};
+use crate::env::env::BriscolaObs;
 use crate::env::player::BriscolaAction;
 use crate::env::utils::env_from_obs;
 

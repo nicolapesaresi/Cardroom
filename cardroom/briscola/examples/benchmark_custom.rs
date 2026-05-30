@@ -23,5 +23,5 @@ fn main() {
         // Box::new(HumanAgent::default()),
     ];
 
-    benchmark_n_games(agents, n_rounds);
+    benchmark_n_games(agents, n_rounds, false);
 }

@@ -1,4 +1,3 @@
-use strum::IntoEnumIterator;
 use strum::EnumIter;
 
 #[derive(EnumIter, Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -150,6 +149,7 @@ impl BriscolaCard {
 mod tests {
     use super::*;
     use rstest::rstest;
+    use strum::IntoEnumIterator;
 
     use crate::env::cards::BriscolaCard;
 
