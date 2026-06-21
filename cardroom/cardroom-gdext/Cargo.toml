@@ -8,4 +8,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 briscola = { path = "../briscola" }
-godot = "0.4"
+godot = "0.5"

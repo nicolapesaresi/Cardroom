@@ -7,6 +7,7 @@ Work in progress.
 
 To run the game you will need `rustc`, `cargo` and **Godot 4.x**, which can be installed following the instructions on [rustup.rs](https://rustup.rs) and [godotengine.org](https://godotengine.org/download).
 To run the game with a `make` command, without opening the editor, you will need to expose Godot to the terminal in the following way:
+
 **macOS** 
 - make sure you moved the Godot app to `/Applications`.
 - add the Godot binary to your PATH so the Makefile can find it, by

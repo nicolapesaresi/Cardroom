@@ -52,54 +52,54 @@ impl BriscolaEnvNode {
         let mut d = VarDictionary::new();
 
         let v = (env.current_player_id as i64).to_variant();
-        d.set("current_player_idx", v);
+        d.set("current_player_idx", &v);
 
         let v = (env.turn_counter as i64).to_variant();
-        d.set("turn_counter", v);
+        d.set("turn_counter", &v);
 
         let v = (env.dealer.deck.len() as i64).to_variant();
-        d.set("deck_size", v);
+        d.set("deck_size", &v);
 
         let mut deck = VarArray::new();
         for card in &env.dealer.deck {
             let cv = card_to_dict(card).to_variant();
             deck.push(&cv);
         }
-        d.set("deck", deck);
+        d.set("deck", &deck);
 
         let mut turn_order = PackedInt32Array::new();
         for &id in &env.turn_order {
             turn_order.push(id as i32);
         }
         let v = turn_order.to_variant();
-        d.set("turn_order", v);
+        d.set("turn_order", &v);
 
         let mut legal_actions = PackedInt32Array::new();
         for action in env.get_legal_actions() {
             legal_actions.push(action.idx() as i32);
         }
         let v = legal_actions.to_variant();
-        d.set("legal_actions", v);
+        d.set("legal_actions", &v);
 
         let mut cards_on_table = VarArray::new();
         for (i, card) in env.cards_on_table.iter().enumerate() {
             let mut entry = VarDictionary::new();
             let sv = (env.turn_order[i] as i64).to_variant();
-            entry.set("seat", sv);
+            entry.set("seat", &sv);
             let cv = card_to_dict(card).to_variant();
-            entry.set("card", cv);
+            entry.set("card", &cv);
             let ev = entry.to_variant();
             cards_on_table.push(&ev);
         }
         let v = cards_on_table.to_variant();
-        d.set("cards_on_table", v);
+        d.set("cards_on_table", &v);
 
         let mut turn_history = PackedInt32Array::new();
         for &id in &env.turn_history {
             turn_history.push(id as i32);
         }
         let v = turn_history.to_variant();
-        d.set("turn_history", v);
+        d.set("turn_history", &v);
 
         let mut played_cards_history = VarArray::new();
         for card in &env.played_cards_history {
@@ -107,7 +107,7 @@ impl BriscolaEnvNode {
             played_cards_history.push(&cv);
         }
         let v = played_cards_history.to_variant();
-        d.set("played_cards_history", v);
+        d.set("played_cards_history", &v);
 
         let mut players = VarArray::new();
         for player in &env.players {
@@ -115,13 +115,13 @@ impl BriscolaEnvNode {
             players.push(&pv);
         }
         let v = players.to_variant();
-        d.set("players", v);
+        d.set("players", &v);
 
         let v = env.done.to_variant();
-        d.set("done", v);
+        d.set("done", &v);
 
         let v = GString::from(result_to_str(env.result)).to_variant();
-        d.set("result", v);
+        d.set("result", &v);
 
         d
     }
@@ -132,22 +132,22 @@ fn card_to_dict(card: &BriscolaCard) -> VarDictionary {
     let mut d = VarDictionary::new();
 
     let v = GString::from(&suit_lower).to_variant();
-    d.set("suit", v);
+    d.set("suit", &v);
 
     let v = GString::from(card.face.name()).to_variant();
-    d.set("face", v);
+    d.set("face", &v);
 
     let v = (card.face.number() as i64).to_variant();
-    d.set("number", v);
+    d.set("number", &v);
 
     let v = (card.points as i64).to_variant();
-    d.set("points", v);
+    d.set("points", &v);
 
     let v = (card.rank as i64).to_variant();
-    d.set("rank", v);
+    d.set("rank", &v);
 
     let v = card.is_briscola.to_variant();
-    d.set("is_briscola", v);
+    d.set("is_briscola", &v);
 
     d
 }
@@ -156,13 +156,13 @@ fn player_to_dict(player: &BriscolaPlayer) -> VarDictionary {
     let mut d = VarDictionary::new();
 
     let v = GString::from(player.name.as_str()).to_variant();
-    d.set("name", v);
+    d.set("name", &v);
 
     let v = (player.points as i64).to_variant();
-    d.set("points", v);
+    d.set("points", &v);
 
     let v = (player.taken_cards.len() as i64).to_variant();
-    d.set("taken_count", v);
+    d.set("taken_count", &v);
 
     let mut hand = VarArray::new();
     for card in &player.hand {
@@ -170,7 +170,7 @@ fn player_to_dict(player: &BriscolaPlayer) -> VarDictionary {
         hand.push(&cv);
     }
     let v = hand.to_variant();
-    d.set("hand", v);
+    d.set("hand", &v);
 
     d
 }
