@@ -11,6 +11,9 @@ pub struct TrickRecord {
     pub agent0_cumpts: i32,
     pub agent1_cumpts: i32,
     pub agent0_took_trick: bool,
+    pub agent0_card: BriscolaCard,
+    pub agent1_card: BriscolaCard,
+    pub first_agent: u8, // which agent (0/1) played first this trick
 }
 
 pub struct GameRecord {
@@ -91,6 +94,12 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
             let had_briscola = env.played_cards_history[hist_len - 2..hist_len]
                 .iter().any(|c| c.is_briscola);
             let trick_winner_agent = agent_for_player_g1[env.turn_order[0]];
+            let p_first = env.turn_history[hist_len - 2];
+            let c_first = env.played_cards_history[hist_len - 2];
+            let c_second = env.played_cards_history[hist_len - 1];
+            let card_of = |pid: usize| if pid == p_first { c_first } else { c_second };
+            let agent0_player = agent_for_player_g1.iter().position(|&a| a == 0).unwrap();
+            let agent1_player = agent_for_player_g1.iter().position(|&a| a == 1).unwrap();
             tricks1.push(TrickRecord {
                 trick_num: tricks1.len() as u8 + 1,
                 trick_points: trick_pts,
@@ -98,6 +107,9 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
                 agent0_cumpts: new_pts[0],
                 agent1_cumpts: new_pts[1],
                 agent0_took_trick: trick_winner_agent == 0,
+                agent0_card: card_of(agent0_player),
+                agent1_card: card_of(agent1_player),
+                first_agent: agent_for_player_g1[p_first] as u8,
             });
             prev_pts = new_pts;
             prev_turn = env.turn_counter;
@@ -105,13 +117,20 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
     }
     let game1 = make_record(env, [0, 1], tricks1);
 
-    // --- Game 2: agent 1 as player 0, same deck so the spy is unchanged ---
+    // --- Game 2: same deck (spy unchanged); the agents swap seats so each one
+    // now plays the OTHER agent's game-1 cards. The deal stays with the seat
+    // (seat 0 = initial[0], seat 1 = initial[1]); only the agent controlling
+    // each seat flips (agent_for_player_g2 below). Game 2 is therefore a
+    // duplicate of game 1 played from the opposite side, so card luck cancels
+    // across the pair.
     env.reset_with_deck(deck.clone());
 
+    // reset_with_deck already deals seat 0 = initial[0], seat 1 = initial[1];
+    // set them explicitly to document that the deal stays with the seat.
     env.players[0].hand.clear();
     env.players[1].hand.clear();
-    for &card in &initial[1] { env.players[0].hand.push(card); }
-    for &card in &initial[0] { env.players[1].hand.push(card); }
+    for &card in &initial[0] { env.players[0].hand.push(card); }
+    for &card in &initial[1] { env.players[1].hand.push(card); }
 
     let mut tricks2: Vec<TrickRecord> = Vec::new();
     let mut prev_pts = [0i32; 2];
@@ -128,8 +147,13 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
         env.step(action);
 
         if env.dealer.deck.len() < pre && pre >= 4 {
-            *env.players[0].hand.last_mut().unwrap() = per_trick[trick_idx][1];
-            *env.players[1].hand.last_mut().unwrap() = per_trick[trick_idx][0];
+            // Force each seat to draw the same card it drew in game 1, in the
+            // same order, regardless of game-2 draw order (the trick winner
+            // draws first, which can differ between games). The final draw
+            // round — the briscola spy — is excluded (pre < 4 there), so the
+            // spy may land with a different seat than in game 1.
+            *env.players[0].hand.last_mut().unwrap() = per_trick[trick_idx][0];
+            *env.players[1].hand.last_mut().unwrap() = per_trick[trick_idx][1];
             trick_idx += 1;
         }
 
@@ -141,6 +165,12 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
                 .iter().any(|c| c.is_briscola);
             // agent 0 = player 1 in game 2
             let trick_winner_agent = agent_for_player_g2[env.turn_order[0]];
+            let p_first = env.turn_history[hist_len - 2];
+            let c_first = env.played_cards_history[hist_len - 2];
+            let c_second = env.played_cards_history[hist_len - 1];
+            let card_of = |pid: usize| if pid == p_first { c_first } else { c_second };
+            let agent0_player = agent_for_player_g2.iter().position(|&a| a == 0).unwrap();
+            let agent1_player = agent_for_player_g2.iter().position(|&a| a == 1).unwrap();
             tricks2.push(TrickRecord {
                 trick_num: tricks2.len() as u8 + 1,
                 trick_points: trick_pts,
@@ -148,6 +178,9 @@ pub fn benchmark_game(env: &mut BriscolaEnv, agents: &[Box<dyn BriscolaAgent>]) 
                 agent0_cumpts: new_pts[1],
                 agent1_cumpts: new_pts[0],
                 agent0_took_trick: trick_winner_agent == 0,
+                agent0_card: card_of(agent0_player),
+                agent1_card: card_of(agent1_player),
+                first_agent: agent_for_player_g2[p_first] as u8,
             });
             prev_pts = new_pts;
             prev_turn = env.turn_counter;
@@ -179,7 +212,7 @@ pub fn benchmark_n_games(agents: Vec<Box<dyn BriscolaAgent>>, n_rounds: usize, c
     );
 
     if csv {
-        println!("round,game,trick,agent0,agent1,briscola_suit,had_briscola,trick_points,agent0_cumpts,agent1_cumpts,agent0_took_trick,agent0_final,agent1_final,game_winner");
+        println!("round,game,trick,agent0,agent1,briscola_suit,had_briscola,trick_points,agent0_cumpts,agent1_cumpts,agent0_took_trick,agent0_card,agent1_card,first_agent,agent0_final,agent1_final,game_winner");
     }
 
     for round_idx in 1..=n_rounds {
@@ -202,7 +235,7 @@ pub fn benchmark_n_games(agents: Vec<Box<dyn BriscolaAgent>>, n_rounds: usize, c
                 };
                 for trick in &record.tricks {
                     println!(
-                        "{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+                        "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
                         round_idx,
                         game_num,
                         trick.trick_num,
@@ -214,6 +247,9 @@ pub fn benchmark_n_games(agents: Vec<Box<dyn BriscolaAgent>>, n_rounds: usize, c
                         trick.agent0_cumpts,
                         trick.agent1_cumpts,
                         trick.agent0_took_trick as u8,
+                        trick.agent0_card.name(),
+                        trick.agent1_card.name(),
+                        trick.first_agent,
                         record.agent_points[0],
                         record.agent_points[1],
                         winner_str,
@@ -337,6 +373,45 @@ mod tests {
         let round = benchmark_game(&mut env, &make_agents());
 
         assert_eq!(round.deals.briscola, env.dealer.briscola);
+    }
+
+    #[test]
+    fn benchmark_game_agents_swap_cards_in_game2() {
+        // Game 2 is game 1 played from the opposite side: each agent should
+        // play the cards its opponent played in game 1. The whole 20-card set a
+        // player holds gets played over the game, so comparing played-card sets
+        // is exact — except the unforced briscola-spy draw, which can swap one
+        // card between the two seats (symmetric difference up to 2).
+        use std::collections::HashSet;
+
+        for _ in 0..30 {
+            let mut env = make_env();
+            let round = benchmark_game(&mut env, &make_agents());
+
+            let cards = |tricks: &[TrickRecord], agent0: bool| -> HashSet<(BriscolaFace, BriscolaSuit)> {
+                tricks.iter().map(|t| {
+                    let c = if agent0 { t.agent0_card } else { t.agent1_card };
+                    (c.face, c.suit)
+                }).collect()
+            };
+
+            // agent 0's game-2 cards vs agent 1's game-1 cards (and vice versa)
+            let a0_g2 = cards(&round.game2.tricks, true);
+            let a1_g1 = cards(&round.game1.tricks, false);
+            let a1_g2 = cards(&round.game2.tricks, false);
+            let a0_g1 = cards(&round.game1.tricks, true);
+
+            assert_eq!(a0_g2.len(), 20);
+            assert_eq!(a1_g2.len(), 20);
+            assert!(
+                a0_g2.symmetric_difference(&a1_g1).count() <= 2,
+                "agent 0 should replay agent 1's game-1 cards (±spy)"
+            );
+            assert!(
+                a1_g2.symmetric_difference(&a0_g1).count() <= 2,
+                "agent 1 should replay agent 0's game-1 cards (±spy)"
+            );
+        }
     }
 
     #[test]
