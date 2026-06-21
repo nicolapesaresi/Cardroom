@@ -20,6 +20,8 @@ var deck_label: Label = null
 var taken_pile_visuals: Array = [[], []]
 var points_labels: Array = [null, null]
 var name_labels: Array = [null, null]
+var hide_toggles: Array = [null, null]
+var hand_hidden: Array = [false, false]
 var current_dot: ColorRect = null
 var dot_positions: Array = [Vector2.ZERO, Vector2.ZERO]
 var result_panel: Node = null
@@ -143,6 +145,17 @@ func _create_name_label(player_idx: int, name: String) -> void:
 	var dot_size = 10.0
 	dot_positions[player_idx] = Vector2(label.position.x - dot_size * 2.0, name_y + label.size.y / 2.0 - dot_size / 2.0)
 
+	var toggle = CheckButton.new()
+	toggle.text = "Hide"
+	toggle.add_theme_font_size_override("font_size", 14)
+	add_child(toggle)
+	await get_tree().process_frame
+	toggle.position = Vector2(
+		label.position.x + label.size.x + 10.0,
+		name_y + label.size.y / 2.0 - toggle.size.y / 2.0)
+	toggle.toggled.connect(_on_hide_toggled.bind(player_idx))
+	hide_toggles[player_idx] = toggle
+
 
 func _draw_initial_deck(deck) -> void:
 	# inflate the deck by 6 placeholder cards to represent the to-be-dealt cards
@@ -195,7 +208,7 @@ func _animate_initial_deal(state) -> void:
 			if slot_idx >= hand.size():
 				continue
 			var card_dict = hand[slot_idx]
-			var moving = _spawn_card(card_dict, deck_pos, false)
+			var moving = _spawn_card(card_dict, deck_pos, hand_hidden[player_id])
 			movers.append({"card": moving, "player": player_id})
 			n_dealt += 1
 
@@ -216,7 +229,9 @@ func _animate_initial_deal(state) -> void:
 			if is_instance_valid(top):
 				top.queue_free()
 		if is_instance_valid(deck_label):
-			deck_label.text = "%d" % max(0, deck_visuals.size())
+			var remaining = max(0, deck_visuals.size())
+			deck_label.text = "%d" % remaining
+			deck_label.visible = remaining > 0
 
 		await t.finished
 		for m in movers:
@@ -256,6 +271,9 @@ func _animate_step(action: int) -> void:
 		var card_dict = pre["players"][current]["hand"][action]
 		var src = _hand_card_pos(current, action, pre_size)
 		card_visual = _spawn_card(card_dict, src, false)
+	if is_instance_valid(card_visual) and card_visual.covered:
+		card_visual.covered = false
+		card_visual.update_visuals()
 	hand_visuals[current][action] = null
 	_compact_hand(current)
 
@@ -316,7 +334,7 @@ func _animate_deal(post) -> void:
 		var post_size = post_hand.size()
 		var slot_idx = post_size - 1
 		var card_dict = post_hand[slot_idx]
-		var moving = _spawn_card(card_dict, deck_pos, false)
+		var moving = _spawn_card(card_dict, deck_pos, hand_hidden[p])
 		movers.append({"card": moving, "player": p})
 		t.tween_property(moving, "position", _hand_card_pos(p, slot_idx, post_size), DEAL_DUR)
 		n_dealt += 1
@@ -334,7 +352,9 @@ func _animate_deal(post) -> void:
 		if is_instance_valid(top):
 			top.queue_free()
 	if is_instance_valid(deck_label):
-		deck_label.text = "%d" % max(0, deck_visuals.size())
+		var remaining = max(0, deck_visuals.size())
+		deck_label.text = "%d" % remaining
+		deck_label.visible = remaining > 0
 
 	await t.finished
 	for m in movers:
@@ -401,7 +421,7 @@ func _show_result() -> void:
 	await get_tree().process_frame
 	box.position = Vector2(
 		HAND_CENTER - box.size.x / 2.0,
-		DisplayServer.screen_get_size()[1] / 2.0 - box.size.y / 2.0)
+		screen_size.y / 2.0 - box.size.y / 2.0)
 	result_panel = box
 
 
@@ -444,6 +464,14 @@ func _spawn_card(card_dict, pos: Vector2, covered: bool) -> Node:
 
 func _on_card_clicked(action_idx: int) -> void:
 	human_action_selected.emit(action_idx)
+
+
+func _on_hide_toggled(pressed: bool, player_idx: int) -> void:
+	hand_hidden[player_idx] = pressed
+	for c in hand_visuals[player_idx]:
+		if is_instance_valid(c):
+			c.covered = pressed
+			c.update_visuals()
 
 func set_screen() -> void:
 	screen_size = get_viewport().get_visible_rect().size
