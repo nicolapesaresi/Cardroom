@@ -4,6 +4,9 @@ use crate::env::env::{BriscolaEnv, BriscolaObs, BriscolaResult};
 use crate::env::player::BriscolaAction;
 use crate::env::utils::env_from_obs;
 
+/// Agent that plays a naive Monte Carlo Tree Search.
+/// It samples a determination of the current observation, plays a random rollout and
+/// chooses the action with the best win ratio after a number of simulations.
 pub struct MCTSAgent {
     name: String,
     simulations: usize,
@@ -76,7 +79,7 @@ impl MCTSNode {
         let mut best_value = f32::NEG_INFINITY;
 
         for &action in &self.legal_actions {
-            let value = self.avg_value(action); // however you compute UCB/avg value
+            let value = self.avg_value(action);
             if value > best_value {
                 best_value = value;
                 best_action = action;

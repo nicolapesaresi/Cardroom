@@ -12,7 +12,7 @@ pub fn make_agent(name: &str) -> Box<dyn BriscolaAgent> {
         "random" => Box::new(RandomAgent::default()),
         "mcts" => Box::new(MCTSAgent::default()),
         _ => {
-            eprintln!("Unknown agent '{}'. Available: bot, random, mcts", name);
+            eprintln!("Unknown agent '{}'. Available: bot, random, mcts, minimax", name);
             std::process::exit(1);
         }
     }

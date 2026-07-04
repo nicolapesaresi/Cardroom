@@ -81,7 +81,7 @@ mod tests {
     fn test_deal() {
         let mut dealer = BriscolaDealer::new();
 
-        for i in 0..40 {
+        for _i in 0..40 {
             let last_card = dealer.deck.last().unwrap().clone();
             let dealt_card = dealer.deal();
             assert_eq!(last_card, dealt_card);

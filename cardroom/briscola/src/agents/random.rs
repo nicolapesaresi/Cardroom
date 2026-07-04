@@ -4,6 +4,7 @@ use crate::env::env::BriscolaObs;
 use crate::env::player::BriscolaAction;  
 use crate::env::utils::env_from_obs;
 
+/// Agent that plays a random card
 pub struct RandomAgent {
     name: String,
 }

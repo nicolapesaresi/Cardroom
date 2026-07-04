@@ -320,7 +320,7 @@ mod tests {
 
     #[test]
     fn test_game() {
-        for i in 0..100 {
+        for _i in 0..100 {
             let env = play_game();
 
             assert!(env.done == true);

@@ -124,7 +124,7 @@ mod tests {
     fn test_legal_actions(#[case] n_cards: usize, #[case] expected: Vec<BriscolaAction>) {
         let mut player = BriscolaPlayer::new(format!("Player"));
 
-        for i in 0..n_cards {
+        for _i in 0..n_cards {
             player.hand.push(BriscolaCard::new(BriscolaFace::Ace, BriscolaSuit::Ori));
         }
 

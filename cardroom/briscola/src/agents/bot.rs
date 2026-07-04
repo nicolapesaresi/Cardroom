@@ -3,7 +3,10 @@ use crate::env::cards::{BriscolaCard, BriscolaSuit};
 use crate::env::env::BriscolaObs;
 use crate::env::player::BriscolaAction;
 use crate::env::utils::env_from_obs;
+use crate::agents::algorithms::minimax::minimax;
 
+/// Agent that plays under rigid rules: take carichi if you can, otherwise play lower ranked card.
+/// Switches to Minimax for last three cards
 pub struct BotAgent {
     name: String,
 }
@@ -50,12 +53,8 @@ impl BotAgent {
             return (2, card.rank);
         }
     }
-}
 
-impl BriscolaAgent for BotAgent {
-    fn name(&self) -> &str { &self.name }
-
-    fn select_action(&self, obs: BriscolaObs) -> BriscolaAction {
+    fn bot_select_action(&self, obs: BriscolaObs) -> BriscolaAction {
         let env = env_from_obs(&obs);
         let legal_actions = env.get_legal_actions();
         let hand = &env.players[env.current_player_id].hand;
@@ -76,5 +75,18 @@ impl BriscolaAgent for BotAgent {
             .min_by_key(|a| Self::card_sort_key(&hand[a.idx()], card_on_table, briscola_suit))
             .unwrap();
         *best_idx
+    }
+}
+
+
+impl BriscolaAgent for BotAgent {
+    fn name(&self) -> &str { &self.name }
+
+    fn select_action(&self, obs: BriscolaObs) -> BriscolaAction {
+        if obs.cards_in_deck == 0 {
+            minimax(obs)
+        } else {
+            self.bot_select_action(obs)
+        }
     }
 }
